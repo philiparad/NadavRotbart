@@ -18,8 +18,8 @@ public partial class LoginCheck : Page
         if (userTable.Rows.Count > 0)
         {
             Session["name"] = userTable.Rows[0]["FirstName"].ToString();
-            Session["ID"] = userTable.Rows[0]["ID"];
-            Session["IsAdmin"] = userTable.Rows[0]["IsAdmin"];
+            Session["ID"] = Convert.ToInt32(userTable.Rows[0]["ID"]);
+            Session["IsAdmin"] = Convert.ToBoolean(userTable.Rows[0]["IsAdmin"]);
             Response.Redirect("HomePage.aspx");
         }
         else

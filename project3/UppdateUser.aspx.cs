@@ -25,7 +25,7 @@ public partial class UppdateUser : Page
             errorVisability = "visible";
         }
 
-        int userId = (int)Session["ID"];
+        int userId = Convert.ToInt32(Session["ID"]);
         DataTable dt = UsersDbApi.getUserById(userId);
         if (dt.Rows.Count == 0)
         {

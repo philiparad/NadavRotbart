@@ -20,7 +20,7 @@ public partial class MasterPage : System.Web.UI.MasterPage
         {
             menu += "<a href = 'HomePage.aspx'> <input class='btn' type = 'button' value = 'דף הבית'/> </a><br /><br />";
             menu += "<a href = 'UppdateUser.aspx'> <input class='btn' type = 'button' value = 'עדכון פרטים'/> </a><br /><br />";
-            if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+            if (Session["IsAdmin"] != null && Convert.ToBoolean(Session["IsAdmin"]))
             {
                 menu += "<a href = 'AdminPage.aspx'> <input class='btn' type = 'button' value = 'דף מנהל'/> </a><br /><br />";
             }

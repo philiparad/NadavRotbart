@@ -5,19 +5,19 @@ public partial class AdminUpdateUserCheck : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        if (Session["ID"] == null || Session["IsAdmin"] == null || !(bool)Session["IsAdmin"])
+        if (Session["ID"] == null || Session["IsAdmin"] == null || !Convert.ToBoolean(Session["IsAdmin"]))
         {
             Response.Redirect("EntryPage.aspx");
             return;
         }
 
-        int currentAdminId = (int)Session["ID"];
+        int currentAdminId = Convert.ToInt32(Session["ID"]);
         if (Session["EditUserID"] == null)
         {
             Response.Redirect("AdminPage.aspx?Msg=משתמש לא תקין");
             return;
         }
-        int userId = (int)Session["EditUserID"];
+        int userId = Convert.ToInt32(Session["EditUserID"]);
 
         if (userId == currentAdminId)
         {
