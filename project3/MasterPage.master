@@ -1,0 +1,56 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="MasterPage" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <style>
+        body {
+            margin: 0;
+        }
+
+        header, footer {
+            text-align: center;
+            background: lightgray;
+            padding: 10px;
+        }
+
+        nav {
+            width: 10%;
+            background: #ddd;
+            padding: 10px;
+        }
+
+        main {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .container {
+            display: flex;
+            min-height: 90vh;
+        }
+        
+    </style>
+    <asp:ContentPlaceHolder id="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body dir="rtl">            
+    <header>
+        <h1 style="color: blueviolet; font-size: 3em">האתר של נדב</h1>                                   
+    </header>
+    <div class="container">
+        <nav>            
+            <br />
+           <%= menu %>
+            <br />
+        </nav>
+        <main>
+            <asp:ContentPlaceHolder id="ContentPlaceHolder2" runat="server"/>
+        </main>
+    </div>
+    <footer style="position: fixed; bottom: 0; width: 100%; color: yellow; font-size: 1.5em">
+        כל הזכויות שמורות
+    </footer>    
+</body>
+</html>
