@@ -17,7 +17,7 @@ public partial class UpdateUserCheck : Page
             return;
         }
 
-        int userId = (int)Session["ID"];
+        int userId = Convert.ToInt32(Session["ID"]);
         string firstName = Request.Form["firstName"];
         string lastName = Request.Form["lastName"];
         string email = Request.Form["email"];

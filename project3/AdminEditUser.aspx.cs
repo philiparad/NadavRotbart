@@ -14,13 +14,13 @@ public partial class AdminEditUser : Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        if (Session["ID"] == null || Session["IsAdmin"] == null || !(bool)Session["IsAdmin"])
+        if (Session["ID"] == null || Session["IsAdmin"] == null || !Convert.ToBoolean(Session["IsAdmin"]))
         {
             Response.Redirect("EntryPage.aspx");
             return;
         }
 
-        int currentAdminId = (int)Session["ID"];
+        int currentAdminId = Convert.ToInt32(Session["ID"]);
         int userId;
         string userIdStr = Request.QueryString["id"] ?? Request.QueryString["UserID"];
         if (!int.TryParse(userIdStr, out userId))
