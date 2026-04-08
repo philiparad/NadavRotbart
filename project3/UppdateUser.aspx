@@ -28,7 +28,7 @@
         <input type="text" id="register-address" name="address" value="<%=row["Address"] %>">
         <h2>מספר טלפון: </h2>
         <span>
-            <input type="text" id="phoneNumber" name="phoneNumber" pattern="[0-9]{7}" maxlength="7" placeholder="7 ספרות">
+            <input type="text" id="phoneNumber" name="phoneNumber" pattern="[0-9]{7}" maxlength="7" placeholder="7 ספרות" value="<%=row["PhoneNumber"] %>">
         </span>
         <span>
             <select id="register-phonePrefix" name="phonePrefix">
@@ -41,7 +41,7 @@
             <input type="radio" name="gender" value="0" <%= ganderMaleCheck %> />
             זכר</label>
         <label>
-            <input type="radio" name="gender" value="1"<%=ganderFemaleCheck %> />
+            <input type="radio" name="gender" value="1" <%=ganderFemaleCheck %> />
             נקבה</label>
 
         <h2>תאריך לידה:</h2>
