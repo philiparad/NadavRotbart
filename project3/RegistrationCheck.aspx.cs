@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Activities.Expressions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,7 +9,7 @@ public partial class RegistrationCheck : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        string username = Request.Form["username"];
+        string username = Request.Form["userName"];
         string userPass = Request.Form["userPass"];
         string firstName = Request.Form["firstName"];
         string lastName = Request.Form["lastName"];
@@ -22,8 +21,8 @@ public partial class RegistrationCheck : System.Web.UI.Page
         string gender = Request.Form["gender"];
         string birthDate = Request.Form["birthDate"];
         string sqlQuery = "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate) " +
-                            string.Format("VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, {7}, {8}, {9}, #{10}#)", 
-                            username, userPass, firstName, lastName, email, address , city,  phoneNum, phonePrefix, gender, birthDate);
+                            string.Format("VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, {7}, {8}, {9}, #{10}#)",
+                            username, userPass, firstName, lastName, email, address, city, phonePrefix, phoneNum, gender, birthDate);
         int rowsAffected = DAL.ExecuteNonQuery(sqlQuery);
         if (rowsAffected > 0)
         {

@@ -12,9 +12,9 @@ public partial class UpdateUserCheck : System.Web.UI.Page
         if (Session["ID"] == null)
         {
             Response.Redirect("EntryPage.aspx");
+            return;
         }
         int userId = (int)Session["ID"];
-        string username = Request.Form["username"];
         //string userPass = Request.Form["userPass"];
         string firstName = Request.Form["firstName"];
         string lastName = Request.Form["lastName"];
