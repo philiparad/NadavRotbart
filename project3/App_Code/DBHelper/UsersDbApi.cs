@@ -103,15 +103,15 @@ public class UsersDbApi
 
     public static DataTable getUserForLogin(string userName, string password)
     {
-        string sqlStr = string.Format("SELECT ID, FirstName FROM UsersTbl WHERE (UserName = '{0}') AND (Password = '{1}')", userName, password);
+        string sqlStr = string.Format("SELECT ID, FirstName, IsAdmin FROM UsersTbl WHERE (UserName = '{0}') AND (Password = '{1}')", userName, password);
         return DAL.GetDataTable(sqlStr);
     }
 
     public static int registerUser(string username, string userPass, string firstName, string lastName, string email, string address,
         string city, string phonePrefix, string phoneNum, string gender, string birthDate)
     {
-        string sqlQuery = "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate) " +
-                            string.Format("VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, {7}, {8}, {9}, #{10}#)",
+        string sqlQuery = "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                            string.Format("VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, {7}, {8}, {9}, #{10}#, False)",
                             username, userPass, firstName, lastName, email, address, city, phonePrefix, phoneNum, gender, birthDate);
         return DAL.ExecuteNonQuery(sqlQuery);
     }
@@ -125,7 +125,22 @@ public class UsersDbApi
         return DAL.ExecuteNonQuery(sqlQuery);
     }
 
-    public static string getUsers()
+    public static int updateUserByAdmin(int userId, string firstName, string lastName, string email, string city, string address,
+        string phoneNum, string phonePrefix, string gender, string birthDate, bool isAdmin)
+    {
+        string sqlQuery = "UPDATE UsersTbl SET " +
+            string.Format("FirstName = '{0}', LastName = '{1}', Address = '{2}', City = {3}, PhoneNumber = {4}, Gender = {5}, BirthDate = #{6}#, PhonePrefix = {7}, Email = '{8}', IsAdmin = {9} WHERE ID = {10}",
+                        firstName, lastName, address, city, phoneNum, gender, birthDate, phonePrefix, email, isAdmin ? "True" : "False", userId);
+        return DAL.ExecuteNonQuery(sqlQuery);
+    }
+
+    public static int deleteUser(int userId)
+    {
+        string sqlQuery = "DELETE FROM UsersTbl WHERE ID = " + userId;
+        return DAL.ExecuteNonQuery(sqlQuery);
+    }
+
+    public static string getUsersTableForAdmin(int currentAdminId)
     {
         string sqlQuery = "select * from CitiesTbl";
         DataTable citiesTable = DAL.GetDataTable(sqlQuery);
@@ -139,9 +154,10 @@ public class UsersDbApi
             "<th>שם משתמש</th>\r\n\t\t\t\t<th>סיסמה</th>\r\n\t\t\t\t<th>שם פרטי</th>\r\n\t\t\t\t<th>שם משפחה</th>\r\n\t\t\t\t" +
             "<th>כתובת דואל</th>\r\n\t\t\t\t<th>כתובת</th>\r\n\t\t\t\t<th>עיר</th>\r\n\t\t\t\t" +
             "<th>מספר טלפון</th>\r\n\t\t\t\t<th>מין</th>\r\n\t\t\t\t<th>תאריך לידה</th>\r\n\t\t\t\t" +
-            "<th>מנהל?</th>\r\n\t\t\t</tr>\r\n\t\t\t";
+            "<th>מנהל?</th>\r\n\t\t\t\t<th>עדכון</th>\r\n\t\t\t\t<th>מחיקה</th>\r\n\t\t\t</tr>\r\n\t\t\t";
         foreach (DataRow row in usersTable.Rows)
         {
+            int userId = int.Parse(row["ID"].ToString());
             responseStr += "<tr width = 90%>";
             responseStr += "<td>" + row["UserName"] + "</td>";
             responseStr += "<td>" + row["Password"] + "</td>";
@@ -167,7 +183,7 @@ public class UsersDbApi
             }
             responseStr += "<td>" + genderName + "</td>";
             DateTime birthDate = (DateTime)row["BirthDate"];
-            responseStr += "<td>" + birthDate.ToLongDateString() + "</td>";
+            responseStr += "<td>" + birthDate.ToString("yyyy-MM-dd") + "</td>";
             bool isAdmin = bool.Parse(row["IsAdmin"].ToString());
             if (isAdmin)
             {
@@ -177,6 +193,18 @@ public class UsersDbApi
             {
                 responseStr += "<td></td>";
             }
+
+            if (userId == currentAdminId)
+            {
+                responseStr += "<td>לא זמין</td><td>לא זמין</td>";
+            }
+            else
+            {
+                responseStr += "<td><a href='AdminEditUser.aspx?UserID=" + userId + "'>עדכון</a></td>";
+                responseStr += "<td><a href='AdminDeleteUser.aspx?UserID=" + userId + "' onclick=\"return confirm('למחוק משתמש זה?');\">מחיקה</a></td>";
+            }
+
+            responseStr += "</tr>";
         }
         return responseStr;
     }

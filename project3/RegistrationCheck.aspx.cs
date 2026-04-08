@@ -24,6 +24,7 @@ public partial class RegistrationCheck : Page
         {
             Session["name"] = firstName;
             Session["ID"] = UsersDbApi.findUserId(username);
+            Session["IsAdmin"] = false;
             Response.Redirect("HomePage.aspx");
         }
         else
