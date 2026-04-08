@@ -12,12 +12,12 @@ public partial class AdminUpdateUserCheck : Page
         }
 
         int currentAdminId = (int)Session["ID"];
-        int userId;
-        if (!int.TryParse(Request.Form["userId"], out userId))
+        if (Session["EditUserID"] == null)
         {
             Response.Redirect("AdminPage.aspx?Msg=משתמש לא תקין");
             return;
         }
+        int userId = (int)Session["EditUserID"];
 
         if (userId == currentAdminId)
         {
@@ -34,13 +34,14 @@ public partial class AdminUpdateUserCheck : Page
         string phonePrefix = Request.Form["phonePrefix"];
         string gender = Request.Form["gender"];
         string birthDate = Request.Form["birthDate"];
-        bool isAdmin = Request.Form["isAdmin"] == "1";
+        bool isAdmin = Request.Form["isAdmin"] != null;
 
         int rowsAffected = UsersDbApi.updateUserByAdmin(userId, firstName, lastName, email, city, address,
             phoneNum, phonePrefix, gender, birthDate, isAdmin);
 
         if (rowsAffected > 0)
         {
+            Session.Remove("EditUserID");
             Response.Redirect("AdminPage.aspx?Msg=פרטי המשתמש עודכנו בהצלחה");
         }
         else
