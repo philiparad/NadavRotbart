@@ -36,7 +36,7 @@ public partial class UppdateUser : Page
 
         row = dt.Rows[0];
 
-        bool gender = (bool)row["gender"];
+        bool gender = ParseGender(row["Gender"]);
         if (gender)
         {
             ganderFemaleCheck = "checked";
@@ -46,6 +46,33 @@ public partial class UppdateUser : Page
             ganderMaleCheck = "checked";
         }
 
-        birthDate = (DateTime)row["BirthDate"];
+        birthDate = ParseBirthDate(row["BirthDate"]);
+    }
+
+    private static bool ParseGender(object value)
+    {
+        if (value is bool)
+        {
+            return (bool)value;
+        }
+
+        int numberValue;
+        return int.TryParse(Convert.ToString(value), out numberValue) && numberValue == 1;
+    }
+
+    private static DateTime ParseBirthDate(object value)
+    {
+        if (value is DateTime)
+        {
+            return (DateTime)value;
+        }
+
+        DateTime parsedDate;
+        if (DateTime.TryParse(Convert.ToString(value), out parsedDate))
+        {
+            return parsedDate;
+        }
+
+        return new DateTime(2000, 1, 1);
     }
 }
