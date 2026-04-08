@@ -37,7 +37,7 @@ public class UsersDbApi
             string selected = "";
             if ((int)citiesTable.Rows[i]["id"] == selectedCity)
                 selected = "selected";
-            responseStr += " <option value='" + citiesTable.Rows[i]["id"] + "'" + selected + "> " + citiesTable.Rows[i]["CityName"] + " </option>";
+            responseStr += " <option value='" + citiesTable.Rows[i]["id"] + "' " + selected + "> " + citiesTable.Rows[i]["CityName"] + " </option>";
         }
 
         return responseStr;
@@ -72,7 +72,7 @@ public class UsersDbApi
             {
                 selected = "";
             }
-            responseStr += " <option value='" + row["id"] + "'" + selected + ">" + row["Prefix"] + " </option>";
+            responseStr += " <option value='" + row["id"] + "' " + selected + ">" + row["Prefix"] + " </option>";
         }
 
 
