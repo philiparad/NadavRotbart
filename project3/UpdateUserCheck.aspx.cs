@@ -5,6 +5,12 @@ public partial class UpdateUserCheck : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
+        if (!IsPostBack && Request.HttpMethod != "POST")
+        {
+            Response.Redirect("UppdateUser.aspx");
+            return;
+        }
+
         if (Session["ID"] == null)
         {
             Response.Redirect("EntryPage.aspx");
@@ -32,7 +38,7 @@ public partial class UpdateUserCheck : Page
         }
         else
         {
-            Response.Redirect("UppdateUser.aspx?Err=Registration Failed, Please Try Again");
+            Response.Redirect("UppdateUser.aspx?Err=Update Failed, Please Try Again");
         }
     }
 }
