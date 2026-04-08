@@ -9,8 +9,7 @@ public partial class AdminEditUser : Page
     protected DataRow row;
     protected string ganderMaleCheck = "";
     protected string ganderFemaleCheck = "";
-    protected string adminYesCheck = "";
-    protected string adminNoCheck = "";
+    protected string adminChecked = "";
     protected DateTime birthDate;
 
     protected void Page_Load(object sender, EventArgs e)
@@ -23,7 +22,8 @@ public partial class AdminEditUser : Page
 
         int currentAdminId = (int)Session["ID"];
         int userId;
-        if (!int.TryParse(Request.QueryString["UserID"], out userId))
+        string userIdStr = Request.QueryString["id"] ?? Request.QueryString["UserID"];
+        if (!int.TryParse(userIdStr, out userId))
         {
             Response.Redirect("AdminPage.aspx?Msg=משתמש לא תקין");
             return;
@@ -49,6 +49,7 @@ public partial class AdminEditUser : Page
         }
 
         row = dt.Rows[0];
+        Session["EditUserID"] = userId;
 
         bool gender = (bool)row["gender"];
         if (gender)
@@ -63,11 +64,7 @@ public partial class AdminEditUser : Page
         bool isAdmin = (bool)row["IsAdmin"];
         if (isAdmin)
         {
-            adminYesCheck = "checked";
-        }
-        else
-        {
-            adminNoCheck = "checked";
+            adminChecked = "checked";
         }
 
         birthDate = (DateTime)row["BirthDate"];

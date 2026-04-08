@@ -13,7 +13,8 @@ public partial class AdminDeleteUser : Page
 
         int currentAdminId = (int)Session["ID"];
         int userId;
-        if (!int.TryParse(Request.QueryString["UserID"], out userId))
+        string userIdStr = Request.QueryString["id"] ?? Request.QueryString["UserID"];
+        if (!int.TryParse(userIdStr, out userId))
         {
             Response.Redirect("AdminPage.aspx?Msg=משתמש לא תקין");
             return;

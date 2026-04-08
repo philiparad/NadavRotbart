@@ -200,8 +200,8 @@ public class UsersDbApi
             }
             else
             {
-                responseStr += "<td><a href='AdminEditUser.aspx?UserID=" + userId + "'>עדכון</a></td>";
-                responseStr += "<td><a href='AdminDeleteUser.aspx?UserID=" + userId + "' onclick=\"return confirm('למחוק משתמש זה?');\">מחיקה</a></td>";
+                responseStr += "<td><a href='AdminEditUser.aspx?id=" + userId + "'>עדכון</a></td>";
+                responseStr += "<td><a href='AdminDeleteUser.aspx?id=" + userId + "' onclick=\"return confirm('למחוק משתמש זה?');\">מחיקה</a></td>";
             }
 
             responseStr += "</tr>";

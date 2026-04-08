@@ -6,7 +6,6 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
     <h1>עדכון משתמש (מנהל)</h1>
     <form id="admin-update-form" action="AdminUpdateUserCheck.aspx" method="post">
-        <input type="hidden" name="userId" value="<%=row["ID"] %>" />
         <h2>שם משתמש: </h2>
         <input name="userName" type="text" value="<%=row["UserName"] %>" readonly />
         <br />
@@ -54,9 +53,7 @@
 
         <h2>הרשאת מנהל:</h2>
         <label>
-            <input type="radio" name="isAdmin" value="1" <%=adminYesCheck %> />מנהל</label>
-        <label>
-            <input type="radio" name="isAdmin" value="0" <%=adminNoCheck %> />משתמש רגיל</label>
+            <input type="checkbox" name="isAdmin" value="1" <%=adminChecked %> />האם מנהל</label>
 
         <div style="visibility: <%=errorVisability %>">
             <h2><%= errorMsg %></h2>
