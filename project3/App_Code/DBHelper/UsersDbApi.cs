@@ -14,6 +14,12 @@ public class UsersDbApi
         //
     }
 
+
+    private static string EscapeSqlString(string value)
+    {
+        return (value ?? string.Empty).Replace("'", "''");
+    }
+
     public static string getCities()
     {
         string sqlQuery = "select * from CitiesTbl";
@@ -83,7 +89,7 @@ public class UsersDbApi
     {
         OleDbConnection dbConnection = DAL.GetConnection();
         dbConnection.Open();
-        string sqlQuery = "select ID from UsersTbl where userName = '" + userName + "'";
+        string sqlQuery = "select ID from UsersTbl where UserName = '" + EscapeSqlString(userName) + "'";
         OleDbCommand dbCmd = DAL.GetCommand(dbConnection, sqlQuery);
         Object obj = dbCmd.ExecuteScalar();
         dbConnection.Close();
@@ -103,7 +109,8 @@ public class UsersDbApi
 
     public static DataTable getUserForLogin(string userName, string password)
     {
-        string sqlStr = string.Format("SELECT ID, FirstName, IsAdmin FROM UsersTbl WHERE (UserName = '{0}') AND (Password = '{1}')", userName, password);
+        string sqlStr = string.Format("SELECT ID, FirstName, IsAdmin FROM UsersTbl WHERE (UserName = '{0}') AND ([Password] = '{1}')",
+            EscapeSqlString(userName), EscapeSqlString(password));
         return DAL.GetDataTable(sqlStr);
     }
 
@@ -112,7 +119,8 @@ public class UsersDbApi
     {
         string sqlQuery = "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
                             string.Format("VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, {7}, {8}, {9}, #{10}#, False)",
-                            username, userPass, firstName, lastName, email, address, city, phonePrefix, phoneNum, gender, birthDate);
+                            EscapeSqlString(username), EscapeSqlString(userPass), EscapeSqlString(firstName), EscapeSqlString(lastName),
+                            EscapeSqlString(email), EscapeSqlString(address), city, phonePrefix, phoneNum, gender, birthDate);
         return DAL.ExecuteNonQuery(sqlQuery);
     }
 
@@ -121,7 +129,8 @@ public class UsersDbApi
     {
         string sqlQuery = "UPDATE UsersTbl SET " +
             string.Format("FirstName = '{0}', LastName = '{1}', Address = '{2}', City = {3}, PhoneNumber = {4}, Gender = {5}, BirthDate = #{6}#, PhonePrefix = {7} ,email='{8}' WHERE ID = {9}",
-                        firstName, lastName, address, city, phoneNum, gender, birthDate, phonePrefix, email, userId);
+                        EscapeSqlString(firstName), EscapeSqlString(lastName), EscapeSqlString(address), city, phoneNum,
+                        gender, birthDate, phonePrefix, EscapeSqlString(email), userId);
         return DAL.ExecuteNonQuery(sqlQuery);
     }
 
@@ -130,7 +139,8 @@ public class UsersDbApi
     {
         string sqlQuery = "UPDATE UsersTbl SET " +
             string.Format("FirstName = '{0}', LastName = '{1}', Address = '{2}', City = {3}, PhoneNumber = {4}, Gender = {5}, BirthDate = #{6}#, PhonePrefix = {7}, Email = '{8}', IsAdmin = {9} WHERE ID = {10}",
-                        firstName, lastName, address, city, phoneNum, gender, birthDate, phonePrefix, email, isAdmin ? "True" : "False", userId);
+                        EscapeSqlString(firstName), EscapeSqlString(lastName), EscapeSqlString(address), city, phoneNum, gender,
+                        birthDate, phonePrefix, EscapeSqlString(email), isAdmin ? "True" : "False", userId);
         return DAL.ExecuteNonQuery(sqlQuery);
     }
 
