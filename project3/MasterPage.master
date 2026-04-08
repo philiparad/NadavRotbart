@@ -46,7 +46,7 @@
             <br />
         </nav>
         <main>
-            <asp:ContentPlaceHolder id="ContentPlaceHolder2" runat="server"/>
+            <asp:ContentPlaceHolder id="ContentPlaceHolder2" runat="server"></asp:ContentPlaceHolder>
         </main>
     </div>
     <footer style="position: fixed; bottom: 0; width: 100%; color: yellow; font-size: 1.5em">
