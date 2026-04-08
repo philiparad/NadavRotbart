@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Globalization;
 using System.Data.OleDb;
 
 /// <summary>
@@ -18,6 +19,32 @@ public class UsersDbApi
     private static string EscapeSqlString(string value)
     {
         return (value ?? string.Empty).Replace("'", "''");
+    }
+
+    private static int ParseIntOrDefault(string value, int defaultValue)
+    {
+        int parsed;
+        return int.TryParse(value, out parsed) ? parsed : defaultValue;
+    }
+
+    private static bool ParseGender(string value)
+    {
+        return value == "1" || string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static DateTime ParseDateOrDefault(string value)
+    {
+        DateTime parsed;
+        if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+        {
+            return parsed;
+        }
+        return new DateTime(2000, 1, 1);
+    }
+
+    private static string ToAccessDateLiteral(DateTime date)
+    {
+        return date.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
     }
 
     public static string getCities()
@@ -96,7 +123,11 @@ public class UsersDbApi
         int retVal = -1;
         if (obj != null)
         {
-            retVal = (int)obj;
+            int parsedId;
+            if (int.TryParse(obj.ToString(), out parsedId))
+            {
+                retVal = parsedId;
+            }
         }
         return retVal;
     }
@@ -117,30 +148,48 @@ public class UsersDbApi
     public static int registerUser(string username, string userPass, string firstName, string lastName, string email, string address,
         string city, string phonePrefix, string phoneNum, string gender, string birthDate)
     {
+        int cityId = ParseIntOrDefault(city, 0);
+        int parsedPhonePrefix = ParseIntOrDefault(phonePrefix, 0);
+        int parsedPhoneNum = ParseIntOrDefault(phoneNum, 0);
+        bool parsedGender = ParseGender(gender);
+        string parsedBirthDate = ToAccessDateLiteral(ParseDateOrDefault(birthDate));
+
         string sqlQuery = "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
                             string.Format("VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, {7}, {8}, {9}, #{10}#, False)",
                             EscapeSqlString(username), EscapeSqlString(userPass), EscapeSqlString(firstName), EscapeSqlString(lastName),
-                            EscapeSqlString(email), EscapeSqlString(address), city, phonePrefix, phoneNum, gender, birthDate);
+                            EscapeSqlString(email), EscapeSqlString(address), cityId, parsedPhonePrefix, parsedPhoneNum, parsedGender ? 1 : 0, parsedBirthDate);
         return DAL.ExecuteNonQuery(sqlQuery);
     }
 
     public static int updateUser(int userId, string firstName, string lastName, string email, string city, string address,
         string phoneNum, string phonePrefix, string gender, string birthDate)
     {
+        int cityId = ParseIntOrDefault(city, 0);
+        int parsedPhoneNum = ParseIntOrDefault(phoneNum, 0);
+        int parsedPhonePrefix = ParseIntOrDefault(phonePrefix, 0);
+        bool parsedGender = ParseGender(gender);
+        string parsedBirthDate = ToAccessDateLiteral(ParseDateOrDefault(birthDate));
+
         string sqlQuery = "UPDATE UsersTbl SET " +
             string.Format("FirstName = '{0}', LastName = '{1}', Address = '{2}', City = {3}, PhoneNumber = {4}, Gender = {5}, BirthDate = #{6}#, PhonePrefix = {7} ,email='{8}' WHERE ID = {9}",
-                        EscapeSqlString(firstName), EscapeSqlString(lastName), EscapeSqlString(address), city, phoneNum,
-                        gender, birthDate, phonePrefix, EscapeSqlString(email), userId);
+                        EscapeSqlString(firstName), EscapeSqlString(lastName), EscapeSqlString(address), cityId, parsedPhoneNum,
+                        parsedGender ? 1 : 0, parsedBirthDate, parsedPhonePrefix, EscapeSqlString(email), userId);
         return DAL.ExecuteNonQuery(sqlQuery);
     }
 
     public static int updateUserByAdmin(int userId, string firstName, string lastName, string email, string city, string address,
         string phoneNum, string phonePrefix, string gender, string birthDate, bool isAdmin)
     {
+        int cityId = ParseIntOrDefault(city, 0);
+        int parsedPhoneNum = ParseIntOrDefault(phoneNum, 0);
+        int parsedPhonePrefix = ParseIntOrDefault(phonePrefix, 0);
+        bool parsedGender = ParseGender(gender);
+        string parsedBirthDate = ToAccessDateLiteral(ParseDateOrDefault(birthDate));
+
         string sqlQuery = "UPDATE UsersTbl SET " +
             string.Format("FirstName = '{0}', LastName = '{1}', Address = '{2}', City = {3}, PhoneNumber = {4}, Gender = {5}, BirthDate = #{6}#, PhonePrefix = {7}, Email = '{8}', IsAdmin = {9} WHERE ID = {10}",
-                        EscapeSqlString(firstName), EscapeSqlString(lastName), EscapeSqlString(address), city, phoneNum, gender,
-                        birthDate, phonePrefix, EscapeSqlString(email), isAdmin ? "True" : "False", userId);
+                        EscapeSqlString(firstName), EscapeSqlString(lastName), EscapeSqlString(address), cityId, parsedPhoneNum, parsedGender ? 1 : 0,
+                        parsedBirthDate, parsedPhonePrefix, EscapeSqlString(email), isAdmin ? "True" : "False", userId);
         return DAL.ExecuteNonQuery(sqlQuery);
     }
 
