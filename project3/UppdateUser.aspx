@@ -22,7 +22,7 @@
         <br />
         <label style="font-size: 1.5em; font-weight: bold;">עיר: </label>
         <select id="register-city" name="city">
-            <% =UserDbApi.getCities((int)row["City"])%>
+            <% =UsersDbApi.getCities((int)row["City"])%>
         </select>
         <h2>כתובת - רחוב ומספר בית: </h2>
         <input type="text" id="register-address" name="address" value="<%=row["Address"] %>">
@@ -32,7 +32,7 @@
         </span>
         <span>
             <select id="register-phonePrefix" name="phonePrefix">
-                <% =UserDbApi.getPhonePrefixes((int)row["PhonePrefix"]) %>
+                <% =UsersDbApi.getPhonePrefixes((int)row["PhonePrefix"]) %>
             </select>
         </span>
 

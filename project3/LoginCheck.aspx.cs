@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.OleDb;
-using System.Linq;
-using System.Web;
+using System.Data;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
-public partial class LoginCheck : System.Web.UI.Page
+public partial class LoginCheck : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -17,23 +13,17 @@ public partial class LoginCheck : System.Web.UI.Page
             Response.Redirect("LoginPage.aspx?Err=חסר שם משתמש או סיסמה או שניהם");
             return;
         }
-        string sqlStr = string.Format("SELECT ID, FirstName FROM UsersTbl WHERE (UserName = '{0}') AND (Password = '{1}')", userName, password);
-        OleDbConnection con = DAL.GetConnection();
-        con.Open();
-        OleDbCommand cmd = DAL.GetCommand(con, sqlStr);
-        OleDbDataReader reader = cmd.ExecuteReader();
-        if (reader.Read())
+
+        DataTable userTable = UsersDbApi.getUserForLogin(userName, password);
+        if (userTable.Rows.Count > 0)
         {
-            Session["name"] = reader.GetString(1);
-            Session["ID"] = reader.GetValue(0);
-            con.Close();
+            Session["name"] = userTable.Rows[0]["FirstName"].ToString();
+            Session["ID"] = userTable.Rows[0]["ID"];
             Response.Redirect("HomePage.aspx");
         }
         else
         {
-            con.Close();
             Response.Redirect("LoginPage.aspx?Err=שם משתמש או סיסמה שגויים");
-        }       
-
+        }
     }
 }

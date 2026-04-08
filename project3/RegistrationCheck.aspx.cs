@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
-public partial class RegistrationCheck : System.Web.UI.Page
+public partial class RegistrationCheck : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -20,14 +16,14 @@ public partial class RegistrationCheck : System.Web.UI.Page
         string phonePrefix = Request.Form["phonePrefix"];
         string gender = Request.Form["gender"];
         string birthDate = Request.Form["birthDate"];
-        string sqlQuery = "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate) " +
-                            string.Format("VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, {7}, {8}, {9}, #{10}#)",
-                            username, userPass, firstName, lastName, email, address, city, phonePrefix, phoneNum, gender, birthDate);
-        int rowsAffected = DAL.ExecuteNonQuery(sqlQuery);
+
+        int rowsAffected = UsersDbApi.registerUser(username, userPass, firstName, lastName, email, address,
+            city, phonePrefix, phoneNum, gender, birthDate);
+
         if (rowsAffected > 0)
         {
             Session["name"] = firstName;
-            Session["ID"] = UserDbApi.findUserId(username);
+            Session["ID"] = UsersDbApi.findUserId(username);
             Response.Redirect("HomePage.aspx");
         }
         else

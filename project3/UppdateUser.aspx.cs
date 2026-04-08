@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using System.Data;
-using System.Data.OleDb;
+using System.Web.UI;
 
-public partial class UppdateUser : System.Web.UI.Page
+public partial class UppdateUser : Page
 {
     protected string errorVisability = "hidden";
     protected string errorMsg = string.Empty;
@@ -16,25 +11,24 @@ public partial class UppdateUser : System.Web.UI.Page
     protected string ganderFemaleCheck = "";
     protected DateTime birthDate;
 
-
     protected void Page_Load(object sender, EventArgs e)
     {
-
         if (Session["ID"] == null)
         {
             Response.Redirect("EntryPage.aspx");
+            return;
         }
-
 
         errorMsg = Request.QueryString["Err"];
         if (errorMsg != null)
         {
             errorVisability = "visible";
         }
+
         int userId = (int)Session["ID"];
-        string sqlQuery = "select * from UsersTbl where ID = " + userId;
-        DataTable dt = DAL.GetDataTable(sqlQuery);
+        DataTable dt = UsersDbApi.getUserById(userId);
         row = dt.Rows[0];
+
         bool gender = (bool)row["gender"];
         if (gender)
         {
@@ -44,6 +38,7 @@ public partial class UppdateUser : System.Web.UI.Page
         {
             ganderMaleCheck = "checked";
         }
+
         birthDate = (DateTime)row["BirthDate"];
     }
 }
