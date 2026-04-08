@@ -27,6 +27,13 @@ public partial class UppdateUser : Page
 
         int userId = (int)Session["ID"];
         DataTable dt = UsersDbApi.getUserById(userId);
+        if (dt.Rows.Count == 0)
+        {
+            Session.Abandon();
+            Response.Redirect("EntryPage.aspx");
+            return;
+        }
+
         row = dt.Rows[0];
 
         bool gender = (bool)row["gender"];
