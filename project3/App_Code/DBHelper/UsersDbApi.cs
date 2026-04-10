@@ -183,12 +183,12 @@ public class UsersDbApi
         DataTable dt = new DataTable();
         using (OleDbConnection dbConnection = GetConnection())
         using (OleDbCommand dbCommand = GetCommand(dbConnection,
-            "SELECT ID, FirstName, IsAdmin FROM UsersTbl WHERE UserName = ? AND [Password] = ?"))
+            "SELECT [ID], [FirstName], [IsAdmin] FROM [UsersTbl] WHERE [UserName] = ? AND [Password] = ?"))
         using (OleDbDataAdapter adapter = new OleDbDataAdapter(dbCommand))
         {
             // OleDb parameters are positional, so keep the add order aligned to the query placeholders.
-            dbCommand.Parameters.AddWithValue("?", userName ?? string.Empty);
-            dbCommand.Parameters.AddWithValue("?", password ?? string.Empty);
+            dbCommand.Parameters.AddWithValue("@UserName", userName ?? string.Empty);
+            dbCommand.Parameters.AddWithValue("@Password", password ?? string.Empty);
             adapter.Fill(dt);
         }
 
