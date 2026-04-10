@@ -50,7 +50,7 @@ public class UsersDbApi
     private static OleDbConnection GetConnection()
     {
         OleDbConnection conn = new OleDbConnection();
-        conn.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|ProjectDB2.accdb";
+        conn.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\ProjectDB2.accdb;Persist Security Info=False;";
         return conn;
     }
 
@@ -180,9 +180,19 @@ public class UsersDbApi
 
     public static DataTable getUserForLogin(string userName, string password)
     {
-        string sqlStr = string.Format("SELECT ID, FirstName, IsAdmin FROM UsersTbl WHERE (UserName = '{0}') AND ([Password] = '{1}')",
-            EscapeSqlString(userName), EscapeSqlString(password));
-        return GetDataTable(sqlStr);
+        DataTable dt = new DataTable();
+        using (OleDbConnection dbConnection = GetConnection())
+        using (OleDbCommand dbCommand = GetCommand(dbConnection,
+            "SELECT ID, FirstName, IsAdmin FROM UsersTbl WHERE UserName = ? AND [Password] = ?"))
+        using (OleDbDataAdapter adapter = new OleDbDataAdapter(dbCommand))
+        {
+            // OleDb parameters are positional, so keep the add order aligned to the query placeholders.
+            dbCommand.Parameters.AddWithValue("?", userName ?? string.Empty);
+            dbCommand.Parameters.AddWithValue("?", password ?? string.Empty);
+            adapter.Fill(dt);
+        }
+
+        return dt;
     }
 
     public static int registerUser(string username, string userPass, string firstName, string lastName, string email, string address,
