@@ -243,19 +243,11 @@ public class UsersDbApi
 
     public static DataTable getUserForLogin(string userName, string password)
     {
-        DataTable dt = new DataTable();
-        using (OleDbConnection dbConnection = GetConnection())
-        using (OleDbCommand dbCommand = GetCommand(dbConnection,
-            "SELECT [ID], [FirstName], [IsAdmin] FROM [UsersTbl] WHERE [UserName] = ? AND [Password] = ?"))
-        using (OleDbDataAdapter adapter = new OleDbDataAdapter(dbCommand))
-        {
-            // OleDb parameters are positional, so keep the add order aligned to the query placeholders.
-            dbCommand.Parameters.AddWithValue("@UserName", userName ?? string.Empty);
-            dbCommand.Parameters.AddWithValue("@Password", password ?? string.Empty);
-            adapter.Fill(dt);
-        }
-
-        return dt;
+        string sqlQuery = string.Format(
+            "SELECT [ID], [FirstName], [IsAdmin] FROM [UsersTbl] WHERE [UserName] = '{0}' AND [Password] = '{1}'",
+            EscapeSqlString(userName),
+            EscapeSqlString(password));
+        return GetDataTable(sqlQuery);
     }
 
     public static int registerUser(string username, string userPass, string firstName, string lastName, string email, string address,
