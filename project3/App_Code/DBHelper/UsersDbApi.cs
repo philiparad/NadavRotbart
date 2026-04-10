@@ -241,13 +241,46 @@ public class UsersDbApi
         return GetDataTable(sqlQuery);
     }
 
+    private static string FindColumnName(DataTable table, string expectedName)
+    {
+        foreach (DataColumn column in table.Columns)
+        {
+            if (string.Equals(column.ColumnName, expectedName, StringComparison.OrdinalIgnoreCase))
+            {
+                return column.ColumnName;
+            }
+        }
+
+        return null;
+    }
+
     public static DataTable getUserForLogin(string userName, string password)
     {
         string sqlQuery = string.Format(
-            "SELECT [ID], [FirstName], [IsAdmin] FROM [UsersTbl] WHERE [UserName] = '{0}' AND [Password] = '{1}'",
+            "SELECT * FROM [UsersTbl] WHERE [UserName] = '{0}' AND [Password] = '{1}'",
             EscapeSqlString(userName),
             EscapeSqlString(password));
-        return GetDataTable(sqlQuery);
+
+        DataTable userTable = GetDataTable(sqlQuery);
+        if (!userTable.Columns.Contains("IsAdmin"))
+        {
+            string adminColumnName = FindColumnName(userTable, "Admin");
+            userTable.Columns.Add("IsAdmin", typeof(bool));
+
+            foreach (DataRow row in userTable.Rows)
+            {
+                if (!string.IsNullOrEmpty(adminColumnName))
+                {
+                    row["IsAdmin"] = Convert.ToBoolean(row[adminColumnName]);
+                }
+                else
+                {
+                    row["IsAdmin"] = false;
+                }
+            }
+        }
+
+        return userTable;
     }
 
     public static int registerUser(string username, string userPass, string firstName, string lastName, string email, string address,
