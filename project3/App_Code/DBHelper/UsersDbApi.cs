@@ -1,7 +1,9 @@
 using System;
 using System.Data;
 using System.Globalization;
+using System.IO;
 using System.Data.OleDb;
+using System.Web;
 
 /// <summary>
 /// Summary description for UsersDbApi
@@ -49,9 +51,70 @@ public class UsersDbApi
 
     private static OleDbConnection GetConnection()
     {
-        OleDbConnection conn = new OleDbConnection();
-        conn.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\ProjectDB2.accdb;Persist Security Info=False;";
-        return conn;
+        string dbPhysicalPath = ResolveDatabasePath();
+        string connectionString = BuildConnectionString(dbPhysicalPath);
+        return new OleDbConnection(connectionString);
+    }
+
+    private static string ResolveDatabasePath()
+    {
+        if (HttpContext.Current != null)
+        {
+            string mappedPath = HttpContext.Current.Server.MapPath("~/App_Data/ProjectDB2.accdb");
+            if (!string.IsNullOrWhiteSpace(mappedPath) && File.Exists(mappedPath))
+            {
+                return mappedPath;
+            }
+        }
+
+        string appBasePath = AppDomain.CurrentDomain.BaseDirectory;
+        string candidatePath = Path.Combine(appBasePath ?? string.Empty, @"App_Data\ProjectDB2.accdb");
+        if (File.Exists(candidatePath))
+        {
+            return candidatePath;
+        }
+
+        return @"|DataDirectory|\ProjectDB2.accdb";
+    }
+
+    private static string BuildConnectionString(string dbPath)
+    {
+        string sanitizedPath = EscapeSqlString(dbPath);
+        string[] providers = new string[]
+        {
+            "Microsoft.ACE.OLEDB.16.0",
+            "Microsoft.ACE.OLEDB.12.0",
+            "Microsoft.Jet.OLEDB.4.0"
+        };
+
+        Exception lastError = null;
+
+        foreach (string provider in providers)
+        {
+            string connectionString = string.Format(
+                CultureInfo.InvariantCulture,
+                "Provider={0};Data Source={1};Persist Security Info=False;",
+                provider,
+                sanitizedPath);
+
+            try
+            {
+                using (OleDbConnection connection = new OleDbConnection(connectionString))
+                {
+                    connection.Open();
+                }
+
+                return connectionString;
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+            }
+        }
+
+        throw new InvalidOperationException(
+            "Could not initialize Access database connection. Install Microsoft Access Database Engine (ACE) x86/x64 to match the app pool.",
+            lastError);
     }
 
     private static OleDbCommand GetCommand(OleDbConnection conn, string sqlQuery)
