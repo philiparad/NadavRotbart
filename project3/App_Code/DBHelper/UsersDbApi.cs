@@ -47,10 +47,48 @@ public class UsersDbApi
         return date.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
     }
 
+    private static OleDbConnection GetConnection()
+    {
+        OleDbConnection conn = new OleDbConnection();
+        conn.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|ProjectDB2.accdb";
+        return conn;
+    }
+
+    private static OleDbCommand GetCommand(OleDbConnection conn, string sqlQuery)
+    {
+        OleDbCommand cmd = new OleDbCommand();
+        cmd.Connection = conn;
+        cmd.CommandText = sqlQuery;
+        return cmd;
+    }
+
+    private static DataTable GetDataTable(string sqlQuery)
+    {
+        DataTable dt = new DataTable();
+        using (OleDbConnection dbConnection = GetConnection())
+        using (OleDbCommand dbCommand = GetCommand(dbConnection, sqlQuery))
+        using (OleDbDataAdapter adapter = new OleDbDataAdapter())
+        {
+            adapter.SelectCommand = dbCommand;
+            adapter.Fill(dt);
+        }
+        return dt;
+    }
+
+    private static int ExecuteNonQuery(string sqlQuery)
+    {
+        using (OleDbConnection dbConnection = GetConnection())
+        using (OleDbCommand dbCommand = GetCommand(dbConnection, sqlQuery))
+        {
+            dbConnection.Open();
+            return dbCommand.ExecuteNonQuery();
+        }
+    }
+
     public static string getCities()
     {
         string sqlQuery = "select * from CitiesTbl";
-        DataTable citiesTable = DAL.GetDataTable(sqlQuery);
+        DataTable citiesTable = GetDataTable(sqlQuery);
         string responseStr = "";
         for (int i = 0; i < citiesTable.Rows.Count; i++)
         {
@@ -63,7 +101,7 @@ public class UsersDbApi
     public static string getCities(int selectedCity)
     {
         string sqlQuery = "select * from CitiesTbl";
-        DataTable citiesTable = DAL.GetDataTable(sqlQuery);
+        DataTable citiesTable = GetDataTable(sqlQuery);
         string responseStr = "";
         for (int i = 0; i < citiesTable.Rows.Count; i++)
         {
@@ -79,7 +117,7 @@ public class UsersDbApi
     public static string getPhonePrefixes()
     {
         string sqlQuery = "select * from PhonePrefixesTbl";
-        DataTable citiesTable = DAL.GetDataTable(sqlQuery);
+        DataTable citiesTable = GetDataTable(sqlQuery);
         string responseStr = "";
 
         foreach (DataRow row in citiesTable.Rows)
@@ -92,7 +130,7 @@ public class UsersDbApi
     public static string getPhonePrefixes(int prefixNumber)
     {
         string sqlQuery = "select * from PhonePrefixesTbl";
-        DataTable citiesTable = DAL.GetDataTable(sqlQuery);
+        DataTable citiesTable = GetDataTable(sqlQuery);
         string responseStr = "";
         string selected;
         foreach (DataRow row in citiesTable.Rows)
@@ -114,12 +152,14 @@ public class UsersDbApi
 
     public static int findUserId(string userName)
     {
-        OleDbConnection dbConnection = DAL.GetConnection();
-        dbConnection.Open();
         string sqlQuery = "select ID from UsersTbl where UserName = '" + EscapeSqlString(userName) + "'";
-        OleDbCommand dbCmd = DAL.GetCommand(dbConnection, sqlQuery);
-        Object obj = dbCmd.ExecuteScalar();
-        dbConnection.Close();
+        Object obj;
+        using (OleDbConnection dbConnection = GetConnection())
+        using (OleDbCommand dbCmd = GetCommand(dbConnection, sqlQuery))
+        {
+            dbConnection.Open();
+            obj = dbCmd.ExecuteScalar();
+        }
         int retVal = -1;
         if (obj != null)
         {
@@ -135,14 +175,14 @@ public class UsersDbApi
     public static DataTable getUserById(int userId)
     {
         string sqlQuery = "select * from UsersTbl where ID = " + userId;
-        return DAL.GetDataTable(sqlQuery);
+        return GetDataTable(sqlQuery);
     }
 
     public static DataTable getUserForLogin(string userName, string password)
     {
         string sqlStr = string.Format("SELECT ID, FirstName, IsAdmin FROM UsersTbl WHERE (UserName = '{0}') AND ([Password] = '{1}')",
             EscapeSqlString(userName), EscapeSqlString(password));
-        return DAL.GetDataTable(sqlStr);
+        return GetDataTable(sqlStr);
     }
 
     public static int registerUser(string username, string userPass, string firstName, string lastName, string email, string address,
@@ -158,7 +198,7 @@ public class UsersDbApi
                             string.Format("VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, {7}, {8}, {9}, #{10}#, False)",
                             EscapeSqlString(username), EscapeSqlString(userPass), EscapeSqlString(firstName), EscapeSqlString(lastName),
                             EscapeSqlString(email), EscapeSqlString(address), cityId, parsedPhonePrefix, parsedPhoneNum, parsedGender ? 1 : 0, parsedBirthDate);
-        return DAL.ExecuteNonQuery(sqlQuery);
+        return ExecuteNonQuery(sqlQuery);
     }
 
     public static int updateUser(int userId, string firstName, string lastName, string email, string city, string address,
@@ -174,7 +214,7 @@ public class UsersDbApi
             string.Format("FirstName = '{0}', LastName = '{1}', Address = '{2}', City = {3}, PhoneNumber = {4}, Gender = {5}, BirthDate = #{6}#, PhonePrefix = {7} ,email='{8}' WHERE ID = {9}",
                         EscapeSqlString(firstName), EscapeSqlString(lastName), EscapeSqlString(address), cityId, parsedPhoneNum,
                         parsedGender ? 1 : 0, parsedBirthDate, parsedPhonePrefix, EscapeSqlString(email), userId);
-        return DAL.ExecuteNonQuery(sqlQuery);
+        return ExecuteNonQuery(sqlQuery);
     }
 
     public static int updateUserByAdmin(int userId, string firstName, string lastName, string email, string city, string address,
@@ -190,25 +230,25 @@ public class UsersDbApi
             string.Format("FirstName = '{0}', LastName = '{1}', Address = '{2}', City = {3}, PhoneNumber = {4}, Gender = {5}, BirthDate = #{6}#, PhonePrefix = {7}, Email = '{8}', IsAdmin = {9} WHERE ID = {10}",
                         EscapeSqlString(firstName), EscapeSqlString(lastName), EscapeSqlString(address), cityId, parsedPhoneNum, parsedGender ? 1 : 0,
                         parsedBirthDate, parsedPhonePrefix, EscapeSqlString(email), isAdmin ? "True" : "False", userId);
-        return DAL.ExecuteNonQuery(sqlQuery);
+        return ExecuteNonQuery(sqlQuery);
     }
 
     public static int deleteUser(int userId)
     {
         string sqlQuery = "DELETE FROM UsersTbl WHERE ID = " + userId;
-        return DAL.ExecuteNonQuery(sqlQuery);
+        return ExecuteNonQuery(sqlQuery);
     }
 
     public static string getUsersTableForAdmin(int currentAdminId)
     {
         string sqlQuery = "select * from CitiesTbl";
-        DataTable citiesTable = DAL.GetDataTable(sqlQuery);
+        DataTable citiesTable = GetDataTable(sqlQuery);
 
         sqlQuery = "select * from PhonePrefixesTbl";
-        DataTable phonePrefixesTable = DAL.GetDataTable(sqlQuery);
+        DataTable phonePrefixesTable = GetDataTable(sqlQuery);
 
         sqlQuery = "select * from UsersTbl";
-        DataTable usersTable = DAL.GetDataTable(sqlQuery);
+        DataTable usersTable = GetDataTable(sqlQuery);
         string responseStr = "<caption>טבלת משתמשים</caption>\r\n\t\t\t<tr bgcolor =\"orange\" width = 90%>\r\n\t\t\t\t" +
             "<th>שם משתמש</th>\r\n\t\t\t\t<th>סיסמה</th>\r\n\t\t\t\t<th>שם פרטי</th>\r\n\t\t\t\t<th>שם משפחה</th>\r\n\t\t\t\t" +
             "<th>כתובת דואל</th>\r\n\t\t\t\t<th>כתובת</th>\r\n\t\t\t\t<th>עיר</th>\r\n\t\t\t\t" +
