@@ -148,15 +148,34 @@ public class UsersDbApi
         }
     }
 
+    private static object ExecuteScalar(string sqlQuery)
+    {
+        using (OleDbConnection dbConnection = GetConnection())
+        using (OleDbCommand dbCommand = GetCommand(dbConnection, sqlQuery))
+        {
+            dbConnection.Open();
+            return dbCommand.ExecuteScalar();
+        }
+    }
+
     public static void EnsureAdminSupport()
     {
         try
         {
-            ExecuteNonQuery("ALTER TABLE UsersTbl ADD COLUMN IsAdmin BIT");
+            ExecuteNonQuery("ALTER TABLE UsersTbl ADD COLUMN IsAdmin BIT DEFAULT False");
         }
         catch
         {
             // Column already exists.
+        }
+
+        try
+        {
+            ExecuteNonQuery("ALTER TABLE UsersTbl ALTER COLUMN IsAdmin BIT DEFAULT False");
+        }
+        catch
+        {
+            // Ignore if default already exists or ALTER syntax differs by provider.
         }
 
         try
@@ -179,6 +198,34 @@ public class UsersDbApi
         catch
         {
             // Ignore; app can still run with admin set manually.
+        }
+
+        try
+        {
+            object countResult = ExecuteScalar("SELECT COUNT(*) FROM UsersTbl");
+            int usersCount = Convert.ToInt32(countResult);
+            if (usersCount == 0)
+            {
+                ExecuteNonQuery(
+                    "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                    "VALUES ('admin', 'admin123', 'System', 'Admin', 'admin@example.com', '1 Admin St', 1, 1, 1111111, False, #01/01/1990#, True)");
+
+                ExecuteNonQuery(
+                    "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                    "VALUES ('alice', 'alice123', 'Alice', 'Cohen', 'alice@example.com', '12 Main St', 2, 2, 2222222, True, #02/02/1992#, False)");
+
+                ExecuteNonQuery(
+                    "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                    "VALUES ('bob', 'bob123', 'Bob', 'Levi', 'bob@example.com', '34 Oak Ave', 3, 3, 3333333, False, #03/03/1993#, False)");
+
+                ExecuteNonQuery(
+                    "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                    "VALUES ('dana', 'dana123', 'Dana', 'Mizrahi', 'dana@example.com', '56 Pine Rd', 4, 4, 4444444, True, #04/04/1994#, False)");
+            }
+        }
+        catch
+        {
+            // Ignore seeding failures when lookup tables/constraints differ.
         }
     }
 
