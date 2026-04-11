@@ -43,6 +43,8 @@
         <nav>            
             <br />
            <%= menu %>
+            <asp:HyperLink ID="adminLink" runat="server" NavigateUrl="~/AdminPage.aspx" Visible="false" CssClass="btn">דף מנהל</asp:HyperLink>
+            <br /><br />
             <br />
         </nav>
         <main>

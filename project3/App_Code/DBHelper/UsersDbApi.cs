@@ -148,6 +148,40 @@ public class UsersDbApi
         }
     }
 
+    public static void EnsureAdminSupport()
+    {
+        try
+        {
+            ExecuteNonQuery("ALTER TABLE UsersTbl ADD COLUMN IsAdmin BIT");
+        }
+        catch
+        {
+            // Column already exists.
+        }
+
+        try
+        {
+            ExecuteNonQuery("UPDATE UsersTbl SET IsAdmin = False WHERE IsAdmin IS NULL");
+        }
+        catch
+        {
+            // Ignore if table is empty or column conversion fails on older data.
+        }
+
+        try
+        {
+            int promotedRows = ExecuteNonQuery("UPDATE UsersTbl SET IsAdmin = True WHERE UserName = 'admin'");
+            if (promotedRows == 0)
+            {
+                ExecuteNonQuery("UPDATE UsersTbl SET IsAdmin = True WHERE ID IN (SELECT TOP 1 ID FROM UsersTbl ORDER BY ID)");
+            }
+        }
+        catch
+        {
+            // Ignore; app can still run with admin set manually.
+        }
+    }
+
     public static string getCities()
     {
         string sqlQuery = "select * from CitiesTbl";
