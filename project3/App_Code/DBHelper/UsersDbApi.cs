@@ -158,11 +158,32 @@ public class UsersDbApi
         }
     }
 
+    private static string ResolveUsersTableName()
+    {
+        string[] tableCandidates = new string[] { "Usertbl", "UsersTbl" };
+        foreach (string tableName in tableCandidates)
+        {
+            try
+            {
+                ExecuteScalar("SELECT COUNT(*) FROM [" + tableName + "]");
+                return tableName;
+            }
+            catch
+            {
+                // Try the next candidate.
+            }
+        }
+
+        throw new InvalidOperationException("Could not find user table. Expected Usertbl or UsersTbl.");
+    }
+
     public static void EnsureAdminSupport()
     {
+        string usersTableName = ResolveUsersTableName();
+
         try
         {
-            ExecuteNonQuery("ALTER TABLE UsersTbl ADD COLUMN IsAdmin BIT DEFAULT False");
+            ExecuteNonQuery("ALTER TABLE [" + usersTableName + "] ADD COLUMN IsAdmin BIT DEFAULT False");
         }
         catch
         {
@@ -171,7 +192,7 @@ public class UsersDbApi
 
         try
         {
-            ExecuteNonQuery("ALTER TABLE UsersTbl ALTER COLUMN IsAdmin BIT DEFAULT False");
+            ExecuteNonQuery("ALTER TABLE [" + usersTableName + "] ALTER COLUMN IsAdmin BIT DEFAULT False");
         }
         catch
         {
@@ -180,7 +201,7 @@ public class UsersDbApi
 
         try
         {
-            ExecuteNonQuery("UPDATE UsersTbl SET IsAdmin = False WHERE IsAdmin IS NULL");
+            ExecuteNonQuery("UPDATE [" + usersTableName + "] SET IsAdmin = False WHERE IsAdmin IS NULL");
         }
         catch
         {
@@ -189,10 +210,10 @@ public class UsersDbApi
 
         try
         {
-            int promotedRows = ExecuteNonQuery("UPDATE UsersTbl SET IsAdmin = True WHERE UserName = 'admin'");
+            int promotedRows = ExecuteNonQuery("UPDATE [" + usersTableName + "] SET IsAdmin = True WHERE UserName = 'admin'");
             if (promotedRows == 0)
             {
-                ExecuteNonQuery("UPDATE UsersTbl SET IsAdmin = True WHERE ID IN (SELECT TOP 1 ID FROM UsersTbl ORDER BY ID)");
+                ExecuteNonQuery("UPDATE [" + usersTableName + "] SET IsAdmin = True WHERE ID IN (SELECT TOP 1 ID FROM [" + usersTableName + "] ORDER BY ID)");
             }
         }
         catch
@@ -202,24 +223,24 @@ public class UsersDbApi
 
         try
         {
-            object countResult = ExecuteScalar("SELECT COUNT(*) FROM UsersTbl");
+            object countResult = ExecuteScalar("SELECT COUNT(*) FROM [" + usersTableName + "]");
             int usersCount = Convert.ToInt32(countResult);
             if (usersCount == 0)
             {
                 ExecuteNonQuery(
-                    "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                    "INSERT INTO [" + usersTableName + "] (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
                     "VALUES ('admin', 'admin123', 'System', 'Admin', 'admin@example.com', '1 Admin St', 1, 1, 1111111, False, #01/01/1990#, True)");
 
                 ExecuteNonQuery(
-                    "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                    "INSERT INTO [" + usersTableName + "] (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
                     "VALUES ('alice', 'alice123', 'Alice', 'Cohen', 'alice@example.com', '12 Main St', 2, 2, 2222222, True, #02/02/1992#, False)");
 
                 ExecuteNonQuery(
-                    "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                    "INSERT INTO [" + usersTableName + "] (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
                     "VALUES ('bob', 'bob123', 'Bob', 'Levi', 'bob@example.com', '34 Oak Ave', 3, 3, 3333333, False, #03/03/1993#, False)");
 
                 ExecuteNonQuery(
-                    "INSERT INTO UsersTbl (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
+                    "INSERT INTO [" + usersTableName + "] (UserName, [Password], FirstName, LastName, Email, Address, City, PhonePrefix, PhoneNumber, Gender, BirthDate, IsAdmin) " +
                     "VALUES ('dana', 'dana123', 'Dana', 'Mizrahi', 'dana@example.com', '56 Pine Rd', 4, 4, 4444444, True, #04/04/1994#, False)");
             }
         }
