@@ -466,10 +466,15 @@ public class UsersDbApi
             responseStr += "<td>" + row["Address"] + "</td>";
             int cityId = int.Parse(row["City"].ToString());
             DataRow[] cityRows = citiesTable.Select("id = " + cityId);
-            responseStr += "<td>" + cityRows[0]["CityName"] + "</td>";
+            string cityName = cityRows.Length > 0 ? cityRows[0]["CityName"].ToString() : "לא ידוע";
+            responseStr += "<td>" + cityName + "</td>";
             int phonePrefixId = int.Parse(row["PhonePrefix"].ToString());
             DataRow[] phonePrefixRows = phonePrefixesTable.Select("id = " + phonePrefixId);
-            responseStr += "<td>" + phonePrefixRows[0]["Prefix"] + "-" + row["PhoneNumber"] + "</td>";
+            string phonePrefix = phonePrefixRows.Length > 0 ? phonePrefixRows[0]["Prefix"].ToString() : "";
+            string phoneDisplay = string.IsNullOrEmpty(phonePrefix)
+                ? row["PhoneNumber"].ToString()
+                : phonePrefix + "-" + row["PhoneNumber"];
+            responseStr += "<td>" + phoneDisplay + "</td>";
             bool genderBool = bool.Parse(row["gender"].ToString());
             string genderName;
             if (genderBool)
