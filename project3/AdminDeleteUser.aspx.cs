@@ -7,7 +7,7 @@ public partial class AdminDeleteUser : Page
     {
         if (Session["ID"] == null || Session["IsAdmin"] == null || !Convert.ToBoolean(Session["IsAdmin"]))
         {
-            Response.Redirect("EntryPage.aspx");
+            Response.Redirect("LoginPage.aspx");
             return;
         }
 

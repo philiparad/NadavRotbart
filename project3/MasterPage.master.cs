@@ -10,6 +10,7 @@ public partial class MasterPage : System.Web.UI.MasterPage
     protected string menu;
     protected void Page_Load(object sender, EventArgs e)
     {
+        adminLink.Visible = false;
         menu = "<a href = 'EntryPage.aspx'> <input class='btn' type = 'button' value = 'דף השער'/> </a><br /><br />";
         if (Session["ID"] == null)
         {
@@ -22,7 +23,7 @@ public partial class MasterPage : System.Web.UI.MasterPage
             menu += "<a href = 'UppdateUser.aspx'> <input class='btn' type = 'button' value = 'עדכון פרטים'/> </a><br /><br />";
             if (Session["IsAdmin"] != null && Convert.ToBoolean(Session["IsAdmin"]))
             {
-                menu += "<a href = 'AdminPage.aspx'> <input class='btn' type = 'button' value = 'דף מנהל'/> </a><br /><br />";
+                adminLink.Visible = true;
             }
             menu += "<input class='btn' type='button' value='התנתק' onclick=\"window.location='Logout.aspx'\" /><br />";
         }
